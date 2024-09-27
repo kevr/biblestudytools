@@ -32,8 +32,10 @@ def parse_args():
                                      description=f"Cache client for {SOURCE}",
                                      epilog=epilog)
 
-    parser.add_argument("-t", "--translation", default="nkjv")
-    parser.add_argument("book")
+    parser.add_argument("-t", "--translation", default="nkjv",
+                        help="Bible translation (default: 'nkjv')")
+    parser.add_argument("book", help="regex matched against books "
+                        "returned by 'biblestudytools list'")
 
     if "list" in sys.argv:
         args = parser.parse_args()
@@ -44,7 +46,9 @@ def parse_args():
             "verse": None,
         }
 
-    parser.add_argument("verse")
+    parser.add_argument("verse",
+                        help="chapter and optional verse range, "
+                        "e.g. 1, 3:16, 1:2-4")
     args = parser.parse_args()
 
     ch = 0  # Chapter

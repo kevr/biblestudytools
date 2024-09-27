@@ -1,1 +1,3 @@
 # biblestudytools
+
+See `biblestudytools --help`
