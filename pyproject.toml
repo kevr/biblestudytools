@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "biblestudytools"
+version = "0.1.0"
+description = "Scraper to https://biblestudytools.com"
+authors = ["Kevin Morris <kevr@0cost.org>"]
+license = "MIT"
+
+[tool.poetry.scripts]
+biblestudytools = "biblestudytools.__main__:main"
+nkjv = "biblestudytools.__main__:main"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+requests = "^2.32.3"
+lxml = "^5.3.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
