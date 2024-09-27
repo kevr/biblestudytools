@@ -13,12 +13,11 @@ import argparse
 import logging
 import logging.config
 import traceback
-import re
 from .bible import Bible
-from .getch import getch
 from .book import Chapter
 from .conf import PROG
 from .ui import BookUI
+from .algorithm import regex_search
 
 SOURCE = "https://biblestudytools.com"
 HOME = os.environ.get("HOME")
@@ -28,13 +27,15 @@ logging.basicConfig(filename="/tmp/bst.log", level=logging.DEBUG,
 
 
 def parse_args():
+    epilog = "To list available books, run 'biblestudytools list'"
     parser = argparse.ArgumentParser(prog=PROG,
-                                     description=f"Cache client for {SOURCE}")
+                                     description=f"Cache client for {SOURCE}",
+                                     epilog=epilog)
 
     parser.add_argument("-t", "--translation", default="nkjv")
     parser.add_argument("book")
 
-    if "books" in sys.argv:
+    if "list" in sys.argv:
         args = parser.parse_args()
         return {
             "translation": args.translation,
@@ -90,24 +91,6 @@ def parse_range(verses: str) -> tuple[int, int]:
     )
 
 
-def wait_for_input(chapter: int) -> int:
-    """
-    print("Press ", end='')
-    if chapter > 1:
-        print("'w' for previous, ", end='')
-    print("'e' for next, or 'q' to exit... ", end='')
-    sys.stdout.flush()
-    """
-    char = getch()
-    if char == 'q':
-        sys.exit(0)
-    elif chapter > 1 and char == 'w':
-        chapter -= 1
-    elif char == 'e':
-        chapter += 1
-    return chapter
-
-
 def output_chapter(chapter: Chapter, verses: tuple[int, int]):
     start, end = verses
     print(f"\n <---> {chapter.title}:{start}-{end} <--->\n")
@@ -136,9 +119,6 @@ def get_lines(chapter: Chapter):
     return lines
 
 
-BLUE_BG = 1
-
-
 def book_view(bible: Bible, book: str, ch: int, verses: tuple[int, int]):
     ui = BookUI()
     ui.loop(bible, book, ch)
@@ -154,15 +134,15 @@ def main():
     bible = Bible(args.get("translation"))
     book = args.get("book")
     books = bible.books()
-    if book == "books":
-        for title, spec in books:
-            print(f"{title}: {spec}")
+    if book == "list":
+        print(", ".join([t[0] for t in books]))
         return 0
 
-    for title, spec in books:
-        if re.search(args.get("book"), title, re.IGNORECASE):
-            book = spec
-            break
+    results = regex_search(args.get("book"), books)
+    if not results:
+        print("error: invalid book name")
+        return 1
+    book = results[0][1]
 
     ch = args.get("chapter")
     verses = args.get("verse")
