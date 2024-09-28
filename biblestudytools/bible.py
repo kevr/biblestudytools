@@ -1,8 +1,10 @@
 import os
+from urllib.parse import quote_plus
 from . import http
 from .cache import Data
 from .conf import BASE_URI
 from .translation import Translation
+from .algorithm import parse_passages
 
 
 class Bible:
@@ -13,6 +15,30 @@ class Bible:
         # Prepare storage
         if not os.path.exists(Data.path):
             os.mkdir(Data.path)
+
+    def search(self, criteria: str, p: int = 1):
+        q = quote_plus(criteria)
+        uri = f"{BASE_URI}/search"
+        params = [
+            ("t", self.translation),
+            ("q", q),
+            ("s", "bibles"),
+            ("p", str(p)),
+        ]
+        urlparams = "&".join([f"{k}={v}" for k, v in params])
+        content = http.get(f"{uri}?{urlparams}")
+
+        root = http.parse(content.decode())
+        results = root.xpath('//div[@id="tabContent"]/div/'
+                             'div[contains(@class, "shadow-md")]')
+
+        output = []
+        for result in results:
+            title = result.xpath('./a')
+            title = ''.join([t.strip() for t in title[0].itertext()])
+            passage = parse_passages(result)
+            output.append((title, passage))
+        return output
 
     def chapter_uri(self, book: str, chapter: int) -> str:
         return f"{BASE_URI}/{self.translation}/{book}/{chapter}.html"

@@ -18,6 +18,7 @@ from .book import Chapter
 from .conf import PROG
 from .ui import BookUI
 from .algorithm import regex_search
+from .http import HttpError
 
 SOURCE = "https://biblestudytools.com"
 HOME = os.environ.get("HOME")
@@ -44,6 +45,16 @@ def parse_args():
             "book": args.book,
             "chapter": None,
             "verse": None,
+        }
+    elif "search" in sys.argv:
+        parser.add_argument("query")
+        args = parser.parse_args()
+        return {
+            "translation": args.translation,
+            "book": args.book,
+            "chapter": None,
+            "verse": None,
+            "query": args.query,
         }
 
     parser.add_argument("verse",
@@ -140,6 +151,21 @@ def main():
     books = bible.books()
     if book == "list":
         print(", ".join([t[0] for t in books]))
+        return 0
+    elif book == "search":
+        p = 1
+        while True:
+            try:
+                results = bible.search(args.get("query"), p)
+            except HttpError:
+                break
+            p += 1
+            for title, passage in results:
+                print(f" - {title}")
+                for lines in passage:
+                    print('\n'.join(lines))
+                print()
+            input("Press enter for more...")
         return 0
 
     results = regex_search(args.get("book"), books)
