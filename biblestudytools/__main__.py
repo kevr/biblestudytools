@@ -165,7 +165,12 @@ def main():
                 for lines in passage:
                     print('\n'.join(lines))
                 print()
-            input("Press enter for more...")
+
+            try:
+                input("Press enter for more or CTRL+C to quit...")
+            except KeyboardInterrupt:
+                break
+
         return 0
 
     results = regex_search(args.get("book"), books)
