@@ -108,7 +108,11 @@ def parse_range(verses: str) -> tuple[int, int]:
 
 def output_chapter(chapter: Chapter, verses: tuple[int, int]):
     start, end = verses
-    print(f"\n <---> {chapter.title}:{start}-{end} <--->\n")
+    verse_disp = f"{start}-{end}"
+    if start == end:
+        verse_disp = str(start)
+
+    print(f"\n <---> {chapter.title}:{verse_disp} <--->\n")
     for i in range(start - 1, end):
         for line in chapter.verses[i]:
             print(line)
