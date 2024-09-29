@@ -159,15 +159,23 @@ def main():
                 results = bible.search(args.get("query"), p)
             except HttpError:
                 break
+
+            remaining = bible.num_results - (p * 20)
             p += 1
+
             for title, passage in results:
                 print(f" - {title}")
                 for lines in passage:
                     print('\n'.join(lines))
                 print()
 
+            if remaining < 1:
+                break
+
             try:
+                print(f"Remaining results: {remaining}")
                 input("Press enter for more or CTRL+C to quit...")
+                print()
             except KeyboardInterrupt:
                 break
 

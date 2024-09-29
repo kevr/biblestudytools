@@ -1,4 +1,5 @@
 import os
+import re
 from urllib.parse import quote_plus
 from . import http
 from .cache import Data
@@ -16,6 +17,8 @@ class Bible:
         if not os.path.exists(Data.path):
             os.mkdir(Data.path)
 
+        self.num_results = 99
+
     def search(self, criteria: str, p: int = 1):
         q = quote_plus(criteria)
         uri = f"{BASE_URI}/search"
@@ -27,11 +30,18 @@ class Bible:
         ]
         urlparams = "&".join([f"{k}={v}" for k, v in params])
         content = http.get(f"{uri}?{urlparams}")
-
         root = http.parse(content.decode())
-        results = root.xpath('//div[@id="tabContent"]/div/'
-                             'div[contains(@class, "shadow-md")]')
 
+        parent = '//div[@id="tabContent"]/div'
+
+        num_results = root.xpath(parent +
+                                 '/div[contains(@class, "text-gray-800")]/'
+                                 'text()')[0].strip()
+        m = re.match(r'^Found (\d+) Results for$', num_results)
+        self.num_results = int(m.group(1))
+
+        results = root.xpath(parent +
+                             '/div[contains(@class, "shadow-md")]')
         output = []
         for result in results:
             title = result.xpath('./a')
