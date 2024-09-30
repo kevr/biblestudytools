@@ -8,18 +8,19 @@ references.
 Author: kevr
 """
 
-import os
-import sys
 import argparse
 import logging
 import logging.config
+import os
+import sys
 import traceback
+
+from .algorithm import regex_search
 from .bible import Bible
 from .book import Chapter
-from .conf import PROG, BASE_URI
-from .ui import BookUI
-from .algorithm import regex_search
+from .conf import BASE_URI, PROG
 from .http import HttpError
+from .ui import BookUI
 
 HOME = os.environ.get("HOME")
 
