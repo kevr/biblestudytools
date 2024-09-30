@@ -63,9 +63,8 @@ class BookUI:
         self.stdscr.refresh()
 
         self._init_layout(*self.stdscr.getmaxyx())
-        self.pad = None
 
-    def _init_layout(self, h: int, w: int):
+    def _init_layout(self, h: int, w: int, splash: bool = True):
         self.h, self.w = h, w
         o = self.TITLEBAR_HEIGHT
 
@@ -75,15 +74,18 @@ class BookUI:
         )
         self.titlebar.refresh()
 
-        splash_str = "Loading..."
-        dh = int((h / 2) - 1)
-        dw = int((w / 2) - (len(splash_str) / 2))
-        self.splash = self.stdscr.derwin(3, len(splash_str) + 6, dh, dw)
-        self.splash.bkgd(
-            " ", curses.color_pair(self.c.id("splash")) | curses.A_BOLD
-        )
-        self.splash.addstr(1, 3, splash_str)
-        self.splash.refresh()
+        if splash:
+            splash_str = "Loading..."
+            dh = int((h / 2) - 1)
+            dw = int((w / 2) - (len(splash_str) / 2))
+            self.splash = self.stdscr.derwin(3, len(splash_str) + 6, dh, dw)
+            self.splash.bkgd(
+                " ", curses.color_pair(self.c.id("splash")) | curses.A_BOLD
+            )
+            self.splash.addstr(1, 3, splash_str)
+            self.splash.refresh()
+
+        self.pad = None
 
     def _paint_titlebar(self, verses: tuple[int, int]):
         # Rerender titlebar
@@ -124,7 +126,6 @@ class BookUI:
         self.stdscr.refresh()
 
         self._init_layout(*self.stdscr.getmaxyx())
-        self._init_pad()
 
     def fetch_chapter(self, bible: Bible, book: str, ch: int):
         uri = bible.local_chapter_uri(book, ch)
