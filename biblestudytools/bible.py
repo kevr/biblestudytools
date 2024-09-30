@@ -19,6 +19,7 @@ class Bible:
             os.mkdir(Data.path)
 
         self.num_results = 99
+        self.num_chapters = None
 
     def search(self, criteria: str, p: int = 1):
         q = quote_plus(criteria)
@@ -68,11 +69,16 @@ class Bible:
 
     def chapters(self, book: str) -> int:
         """Number of chapters in a book."""
+        if self.num_chapters is not None:
+            return self.num_chapters
+
         path = self.book_uri(book) + "/chapters"
         if os.path.exists(path):
             with open(path) as f:
-                data = int(f.read().strip())
-            return data
+                self.num_chapters = int(f.read().strip())
+            return self.num_chapters
+
+        return None
 
     def save_chapters(self, book: str, chapters: str):
         path = self.book_uri(book) + "/chapters"

@@ -89,7 +89,17 @@ class BookUI:
 
     def _paint_titlebar(self, verses: tuple[int, int]):
         # Rerender titlebar
-        title = f"{self.chapter.title} | {verses[0]}-{verses[1]}"
+        chapters = self.bible.chapters(self.book)
+
+        title = self.chapter.title.split()
+        num_chapter = title[-1]
+        title = " ".join(title[:-1])
+
+        lhs = f"{title}, {num_chapter}"
+        if chapters is not None:
+            lhs += f" of {chapters}"
+        title = f"{lhs} | {verses[0]}-{verses[1]}"
+
         self.titlebar.erase()
         lt = len(title)
         x = int(self.w / 2) - int(lt / 2) - int(not (lt % 2))
@@ -143,6 +153,8 @@ class BookUI:
 
     def __forward_thread(self, bible: Bible, book: str, ch: int):
         num_chapters = bible.chapters(book) or 200
+
+        chap = None
         try:
             for i in range(ch + 1, num_chapters):
                 if not self.forward_running:
@@ -155,6 +167,7 @@ class BookUI:
         except HttpError as exc:
             # Save the raised index
             bible.save_chapters(book, str(exc))
+            self._paint_titlebar(self.chapter.range())
 
     def _thread(self, fn, bible: Bible, book: str, ch: int):
         try:
@@ -237,7 +250,7 @@ class BookUI:
         self.pad.refresh()
         return True
 
-    def _down_n(self, y: int, direction: int = 1) -> bool:
+    def _interval_n(self, y: int, direction: int = 1) -> bool:
         n_lines = len(self.lines)
         bottom_most = n_lines - self.pad_h
 
@@ -257,13 +270,13 @@ class BookUI:
         return True
 
     def _down(self) -> bool:
-        self._down_n(1)
+        self._interval_n(1)
         return True
 
     def _page_down(self) -> bool:
         remaining = (len(self.lines) - 1) - self.i
         x = min(self.pad_h, remaining)
-        return self._down_n(x)
+        return self._interval_n(x)
 
     def _left(self) -> bool:
         if not self.bible.chapter_exists(self.book, self.ch - 1):
