@@ -54,6 +54,7 @@ class BookUI:
 
         self.c = Colors()
         self.c.define("highlight", (curses.COLOR_BLACK, curses.COLOR_BLUE))
+        self.c.define("splash", (curses.COLOR_BLACK, curses.COLOR_BLUE))
 
         # Initialize input specifics
         self.stdscr.keypad(True)
@@ -62,6 +63,7 @@ class BookUI:
         self.stdscr.refresh()
 
         self._init_layout(*self.stdscr.getmaxyx())
+        self.pad = None
 
     def _init_layout(self, h: int, w: int):
         self.h, self.w = h, w
@@ -73,8 +75,15 @@ class BookUI:
         )
         self.titlebar.refresh()
 
-        self.pad = self.stdscr.subpad(h - o, w, o, 0)
-        self.pad.scrollok(1)
+        splash_str = "Loading..."
+        dh = int((h / 2) - 1)
+        dw = int((w / 2) - (len(splash_str) / 2))
+        self.splash = self.stdscr.derwin(3, len(splash_str) + 6, dh, dw)
+        self.splash.bkgd(
+            " ", curses.color_pair(self.c.id("splash")) | curses.A_BOLD
+        )
+        self.splash.addstr(1, 3, splash_str)
+        self.splash.refresh()
 
     def _paint_titlebar(self, verses: tuple[int, int]):
         # Rerender titlebar
@@ -85,7 +94,17 @@ class BookUI:
         self.titlebar.addstr(0, x, title)
         self.titlebar.refresh()
 
+    def _init_pad(self):
+        self.splash.deleteln()
+        h, w = self.stdscr.getmaxyx()
+        o = 1
+        self.pad = self.stdscr.subpad(
+            h - self.TITLEBAR_HEIGHT, w, self.TITLEBAR_HEIGHT, 0
+        )
+        self.pad.scrollok(1)
+
     def _paint_pad(self):
+        self.pad.erase()
         self.lines = self.chapter.lines()
         n = min(curses.LINES - 1, len(self.lines))
         for i in range(0, n):
@@ -159,12 +178,15 @@ class BookUI:
         self.back_thread.start()
 
         while True:
-            self.pad.erase()
+            if self.pad is None:
+                self._init_pad()
             try:
                 content = self.bible.get_chapter(book, self.ch)
                 self.chapter = Chapter(content)
             except HttpError as e:
                 logging.error(e)
+                curses.endwin()
+                print(f"error: {e}")
                 return None
 
             self.pad_h, self.pad_w = self.pad.getmaxyx()
@@ -280,4 +302,7 @@ class BookUI:
 
     def __del__(self):
         self.sync()
-        curses.endwin()
+        try:
+            curses.endwin()
+        except Exception:
+            pass
