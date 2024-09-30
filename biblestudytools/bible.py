@@ -96,3 +96,22 @@ class Bible:
             content = http.get(self.chapter_uri(book, chapter))
             Data.save_chapter(self.translation, book, chapter, content)
         return content.decode()
+
+    def download(self):
+        """Download the whole Bible."""
+        books = self.books()
+        for book_display, book in books:
+            nc = self.chapters(book)
+            self.num_chapters = None
+
+            for i in range(1, nc - 1):
+                if self.chapter_exists(book, i):
+                    continue
+
+                try:
+                    self.get_chapter(book, i)
+                except http.HttpError:
+                    num_chapters = i - 1
+                    self.save_chapters(book, str(num_chapters))
+                    print(f"Downloaded '{book_display}'")
+                    break

@@ -49,7 +49,7 @@ def parse_args():
         "returned by 'biblestudytools list'",
     )
 
-    if "list" in sys.argv:
+    if "list" in sys.argv or "download" in sys.argv:
         args = parser.parse_args()
         return {
             "translation": args.translation,
@@ -197,6 +197,9 @@ def main():
             except KeyboardInterrupt:
                 break
 
+        return 0
+    elif book == "download":
+        bible.download()
         return 0
 
     results = regex_search(args.get("book"), books)
