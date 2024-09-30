@@ -124,6 +124,7 @@ class BookUI:
         self.stdscr.refresh()
 
         self._init_layout(*self.stdscr.getmaxyx())
+        self._init_pad()
 
     def fetch_chapter(self, bible: Bible, book: str, ch: int):
         uri = bible.local_chapter_uri(book, ch)
