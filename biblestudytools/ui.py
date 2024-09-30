@@ -1,8 +1,9 @@
-import os
-import sys
 import curses
 import logging
+import os
+import sys
 import threading
+
 from .bible import Bible
 from .book import Chapter
 from .http import HttpError
@@ -67,8 +68,9 @@ class BookUI:
         o = self.TITLEBAR_HEIGHT
 
         self.titlebar = self.stdscr.derwin(o, w, 0, 0)
-        self.titlebar.bkgd(' ', curses.color_pair(
-            self.c.id("highlight")) | curses.A_BOLD)
+        self.titlebar.bkgd(
+            " ", curses.color_pair(self.c.id("highlight")) | curses.A_BOLD
+        )
         self.titlebar.refresh()
 
         self.pad = self.stdscr.subpad(h - o, w, o, 0)
@@ -146,12 +148,14 @@ class BookUI:
 
         self.forward_thread = threading.Thread(
             target=self._thread,
-            args=(self.__forward_thread, self.bible, book, ch))
+            args=(self.__forward_thread, self.bible, book, ch),
+        )
         self.forward_thread.start()
 
         self.back_thread = threading.Thread(
             target=self._thread,
-            args=(self.__back_thread, self.bible, book, ch))
+            args=(self.__back_thread, self.bible, book, ch),
+        )
         self.back_thread.start()
 
         while True:
@@ -178,7 +182,7 @@ class BookUI:
             curses.KEY_LEFT: self._left,
             curses.KEY_RIGHT: self._right,
             curses.KEY_RESIZE: self._resize,
-            ord('q'): self._quit,
+            ord("q"): self._quit,
         }
 
         while True:

@@ -1,5 +1,5 @@
-from lxml import etree
 import requests
+from lxml import etree
 
 
 class HttpError(Exception):
@@ -7,7 +7,7 @@ class HttpError(Exception):
 
 
 def parse(content: str) -> etree._Element:
-    """ Return lxml.etree root node of content """
+    """Return lxml.etree root node of content"""
     parser = etree.HTMLParser(recover=True)
     return etree.fromstring(content, parser)
 

@@ -1,4 +1,5 @@
 from lxml import etree
+
 from .algorithm import parse_passages
 
 
@@ -12,7 +13,7 @@ class Chapter:
         root = etree.fromstring(content, parser)
 
         h1 = root.xpath("//div/h1[contains(@class, 'text-xl')]")
-        title = ''.join(h1[0].itertext()).strip()
+        title = "".join(h1[0].itertext()).strip()
         if title == "Page not found":
             raise Exception("Page not found")
 

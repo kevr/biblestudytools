@@ -1,5 +1,6 @@
-import os
 import gzip
+import os
+
 from .conf import PROG
 
 
@@ -24,8 +25,9 @@ class Data:
         except FileExistsError:
             pass
 
-    def save_chapter(translation: str, book: str, chapter: str,
-                     content: bytes):
+    def save_chapter(
+        translation: str, book: str, chapter: str, content: bytes
+    ):
         path = f"{Data.path}/{translation}/{book}/{chapter}"
         with gzip.open(path, "wb") as fh:
             fh.write(content)
