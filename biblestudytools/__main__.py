@@ -7,6 +7,7 @@ references.
 
 Author: kevr
 """
+
 import os
 import sys
 import argparse
@@ -15,28 +16,37 @@ import logging.config
 import traceback
 from .bible import Bible
 from .book import Chapter
-from .conf import PROG
+from .conf import PROG, BASE_URI
 from .ui import BookUI
 from .algorithm import regex_search
 from .http import HttpError
 
-SOURCE = "https://biblestudytools.com"
 HOME = os.environ.get("HOME")
 
-logging.basicConfig(filename="/tmp/bst.log", level=logging.DEBUG,
-                    format='%(asctime)s %(levelname)s:%(message)s')
+logging.basicConfig(
+    filename="/tmp/bst.log",
+    level=logging.DEBUG,
+    format="%(asctime)s %(levelname)s:%(message)s",
+)
 
 
 def parse_args():
     epilog = "To list available books, run 'biblestudytools list'"
-    parser = argparse.ArgumentParser(prog=PROG,
-                                     description=f"Cache client for {SOURCE}",
-                                     epilog=epilog)
+    parser = argparse.ArgumentParser(
+        prog=PROG, description=f"Cache client for {BASE_URI}", epilog=epilog
+    )
 
-    parser.add_argument("-t", "--translation", default="nkjv",
-                        help="Bible translation (default: 'nkjv')")
-    parser.add_argument("book", help="regex matched against books "
-                        "returned by 'biblestudytools list'")
+    parser.add_argument(
+        "-t",
+        "--translation",
+        default="nkjv",
+        help="Bible translation (default: 'nkjv')",
+    )
+    parser.add_argument(
+        "book",
+        help="regex matched against books "
+        "returned by 'biblestudytools list'",
+    )
 
     if "list" in sys.argv:
         args = parser.parse_args()
@@ -57,27 +67,30 @@ def parse_args():
             "query": args.query,
         }
 
-    parser.add_argument("verse",
-                        help="chapter and optional verse range, "
-                        "e.g. 1, 3:16, 1:2-4")
+    parser.add_argument(
+        "verse",
+        help="chapter and optional verse range, " "e.g. 1, 3:16, 1:2-4",
+    )
     args = parser.parse_args()
 
     ch = 0  # Chapter
     verse = None  # Verse
-    if ':' in args.verse:
-        ch, verse = args.verse.split(':')
+    if ":" in args.verse:
+        ch, verse = args.verse.split(":")
         ch = int(ch)
-        if '-' in verse:
-            verse = verse.split('-')
+        if "-" in verse:
+            verse = verse.split("-")
             try:
                 start, end = [int(x) for x in verse]
             except Exception:
                 raise argparse.ArgumentError(
-                    f"invalid verse specification '{args.verse}'")
+                    f"invalid verse specification '{args.verse}'"
+                )
 
             if start < 1 or start > end:
                 raise argparse.ArgumentError(
-                    "invalid verse range; a >= 1 && b >= a")
+                    "invalid verse range; a >= 1 && b >= a"
+                )
 
             verse = (start, end)
         else:
@@ -95,11 +108,11 @@ def parse_args():
 
 
 def parse_range(verses: str) -> tuple[int, int]:
-    if '-' not in verses:
+    if "-" not in verses:
         i = int(verses)
         return (i, i)
 
-    start, end = verses.split('-')
+    start, end = verses.split("-")
     return (
         int(start),
         int(end),
@@ -170,7 +183,7 @@ def main():
             for title, passage in results:
                 print(f" - {title}")
                 for lines in passage:
-                    print('\n'.join(lines))
+                    print("\n".join(lines))
                 print()
 
             if remaining < 1:

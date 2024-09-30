@@ -5,6 +5,9 @@ description = "Scraper to https://biblestudytools.com"
 authors = ["Kevin Morris <kevr@0cost.org>"]
 license = "MIT"
 
+[tool.black]
+line_length = 79
+
 [tool.poetry.scripts]
 biblestudytools = "biblestudytools.__main__:main"
 nkjv = "biblestudytools.__main__:main"
