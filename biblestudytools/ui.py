@@ -74,6 +74,7 @@ class BookUI:
         )
         self.titlebar.refresh()
 
+        """
         if splash:
             splash_str = "Loading..."
             dh = int((h / 2) - 1)
@@ -84,6 +85,7 @@ class BookUI:
             )
             self.splash.addstr(1, 3, splash_str)
             self.splash.refresh()
+        """
 
         self.pad = None
 
@@ -100,14 +102,18 @@ class BookUI:
             lhs += f" of {chapters}"
         title = f"{lhs} | {verses[0]}-{verses[1]}"
 
+        y, x = self.titlebar.getmaxyx()
+        if x < len(title) + 1:
+            return None
+
         self.titlebar.erase()
         lt = len(title)
-        x = int(self.w / 2) - int(lt / 2) - int(not (lt % 2))
+        x = max(int(self.w / 2) - int(lt / 2) - int(not (lt % 2)), 0)
         self.titlebar.addstr(0, x, title)
         self.titlebar.refresh()
 
     def _init_pad(self):
-        self.splash.deleteln()
+        # self.splash.deleteln()
         h, w = self.stdscr.getmaxyx()
         o = 1
         self.pad = self.stdscr.subpad(
@@ -116,6 +122,10 @@ class BookUI:
         self.pad.scrollok(1)
 
     def _paint_pad(self):
+        y, x = self.pad.getmaxyx()
+        if x <= 6:
+            return None
+
         self.pad.erase()
         self.lines = self.chapter.lines()
         n = min(curses.LINES - 1, len(self.lines))
@@ -136,6 +146,8 @@ class BookUI:
         self.stdscr.refresh()
 
         self._init_layout(*self.stdscr.getmaxyx())
+
+        return False
 
     def fetch_chapter(self, bible: Bible, book: str, ch: int):
         uri = bible.local_chapter_uri(book, ch)
@@ -195,6 +207,7 @@ class BookUI:
         while True:
             if self.pad is None:
                 self._init_pad()
+
             try:
                 content = self.bible.get_chapter(book, self.ch)
                 self.chapter = Chapter(content)
@@ -301,8 +314,7 @@ class BookUI:
             self.resized = 0
             return True
 
-        self.resize()
-        return False
+        return self.resize()
 
     def _quit(self) -> bool:
         self.sync()
