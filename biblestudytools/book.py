@@ -18,10 +18,10 @@ class Chapter:
             raise Exception("Page not found")
 
         self.title = title
-        self.verses = parse_passages(root)
+        self.num_verses, self.verses = parse_passages(root)
 
     def range(self) -> tuple[int, int]:
-        return (1, len(self.verses))
+        return (1, self.num_verses)
 
     def lines(self):
         output = []

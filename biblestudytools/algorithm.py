@@ -12,18 +12,35 @@ def parse_passages(root: etree._Element):
     divs = root.xpath(".//div[contains(@class, 'leading-8')]")
     i = 0
     output = []
+    num_verses = 0
     for div in divs:
+        offset = 1
+
+        title = div.xpath("./h3")
+        if title:
+            offset = 2
+            title = title[0].xpath("./text()")[0]
+
+        verse_num = div.xpath("./a/text()")[0].strip()
+
         i += 1
-        indent = " " * (2 + len(str(i)))
+        indent = " " * (1 + len(str(i)))
 
         # Text sanitization for display
-        text = re.sub(
-            r"\s{2}", " ", " ".join([t.strip() for t in div.itertext()])
-        )
+        body = [t.strip() for t in div.itertext()]
+        body = [x for x in body if x]
+        body = [verse_num] + body[offset:]
+
+        text = re.sub(r"\s{2}", " ", " ".join(body))
         text = re.sub(r" ([:?,])", r"\1", text)
 
+        if title:
+            output.append(["", f"{title}", ""])
+
         output.append(wrap(text, width=textwidth, subsequent_indent=indent))
-    return output
+        num_verses += 1
+
+    return (num_verses, output)
 
 
 def reduce(array: list[Any], check: Callable) -> list[Any]:
