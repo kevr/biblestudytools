@@ -206,7 +206,12 @@ class BookUI:
 
             self.pad_h, self.pad_w = self.pad.getmaxyx()
             self._paint_titlebar(self.chapter.range())
-            self._paint_pad()
+
+            try:
+                self._paint_pad()
+            except curses.error:
+                self.resize()
+                continue
 
             self.input_loop()
 
