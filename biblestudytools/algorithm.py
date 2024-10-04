@@ -35,7 +35,8 @@ def parse_passages(root: etree._Element):
         text = re.sub(r" ([:?,])", r"\1", text)
 
         if title:
-            output.append(["", f"{title}", ""])
+            w = wrap(title, width=textwidth, subsequent_indent="")
+            output += [[""], w, [""]]
 
         output.append(wrap(text, width=textwidth, subsequent_indent=indent))
         num_verses += 1
