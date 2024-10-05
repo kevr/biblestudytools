@@ -47,7 +47,7 @@ class Bible:
         for result in results:
             title = result.xpath("./a")
             title = "".join([t.strip() for t in title[0].itertext()])
-            passage = parse_passages(result)
+            num_verses, passage = parse_passages(result)
             output.append((title, passage))
         return output
 
