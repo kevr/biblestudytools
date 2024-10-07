@@ -38,6 +38,10 @@ class Translation:
             with gzip.open(local_uri, "rb") as f:
                 content = f.read()
         else:
+            dp = "/".join(local_uri.split("/")[-1:])
+            if not os.path.isdir(dp):
+                os.mkdir(dp)
+
             uri = f"{BASE_URI}/{self.name}"
             content = http.get(uri)
             with gzip.open(local_uri, "wb") as f:
