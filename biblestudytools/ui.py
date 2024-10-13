@@ -6,34 +6,8 @@ import threading
 
 from .bible import Bible
 from .book import Chapter
+from .color import Colors
 from .http import HttpError
-
-
-class Colors:
-    pair_ids: dict[str, int]
-    pairs: dict[str, tuple[int, int]]
-
-    def __init__(self, pairs: list[tuple[str, tuple[int, int]]] = []):
-        self.pair_ids, self.pairs = {}, {}
-
-        curses.start_color()
-        curses.use_default_colors()
-
-        self.i = 1
-        for name, pair in pairs:
-            self.define(name, pair)
-
-    def define(self, name: str, pair: tuple[int, int]):
-        curses.init_pair(self.i, *pair)
-        self.pair_ids[name] = self.i
-        self.pairs[name] = pair
-        self.i += 1
-
-    def id(self, name: str) -> int:
-        return self.pair_ids.get(name)
-
-    def pair(self, name: str) -> tuple[int, int]:
-        return self.pairs.get(name)
 
 
 class BookUI:
@@ -53,7 +27,6 @@ class BookUI:
         curses.curs_set(0)
 
         self.c = Colors()
-        self.c.define("highlight", (curses.COLOR_BLACK, curses.COLOR_BLUE))
 
         # Initialize input specifics
         self.stdscr.keypad(True)
@@ -68,9 +41,7 @@ class BookUI:
         o = self.TITLEBAR_HEIGHT
 
         self.titlebar = self.stdscr.derwin(o, w, 0, 0)
-        self.titlebar.bkgd(
-            " ", curses.color_pair(self.c.id("highlight")) | curses.A_BOLD
-        )
+        self.titlebar.bkgd(" ", self.c.color("highlight", curses.A_BOLD))
         self.titlebar.refresh()
 
         self.pad = None
@@ -115,7 +86,8 @@ class BookUI:
         self.lines = self.chapter.lines()
         n = min(curses.LINES - 1, len(self.lines))
         for i in range(0, n):
-            self.pad.addstr(i, 0, self.lines[i])
+            attr, line = self.lines[i]
+            self.pad.addstr(i, 0, line, attr)
         self.pad.refresh()
 
         # Reset position to the top
@@ -237,7 +209,8 @@ class BookUI:
             return True
 
         self.pad.scroll(-1)
-        self.pad.addstr(0, 0, self.lines[self.i - self.pad_h])
+        attr, line = self.lines[self.i - self.pad_h]
+        self.pad.addstr(0, 0, line, attr)
         self.pos -= 1
         self.i -= 1
 
@@ -265,7 +238,8 @@ class BookUI:
         pos = self.pad_h - yd
         for i in range(y):
             self.i += 1 * direction
-            self.pad.addstr(pos, 0, self.lines[self.i])
+            attr, line = self.lines[self.i]
+            self.pad.addstr(pos, 0, line, attr)
             pos += 1 * direction
         self.pos += yd
         self.pad.refresh()

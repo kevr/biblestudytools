@@ -26,6 +26,6 @@ class Chapter:
     def lines(self):
         output = []
         for vl in self.verses:
-            for v in vl:
-                output.append(v)
+            for v in vl[1]:
+                output.append((vl[0], v))
         return output

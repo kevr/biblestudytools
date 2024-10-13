@@ -1,9 +1,16 @@
+import curses
 import re
 import shutil
 from textwrap import wrap
 from typing import Any, Callable
 
 from lxml import etree
+
+from .color import Colors
+
+
+def _dec(content: list[str], attr: int = 0) -> tuple[int, list[str]]:
+    return (attr, content)
 
 
 def parse_passages(root: etree._Element):
@@ -36,9 +43,19 @@ def parse_passages(root: etree._Element):
 
         if title:
             w = wrap(title, width=textwidth, subsequent_indent="")
-            output += [[""], w, [""]]
+            output += [
+                _dec([""], Colors.default_color()),
+                # Boldify segment titles
+                _dec(w, Colors.default_color(curses.A_BOLD)),
+                _dec([""], Colors.default_color()),
+            ]
 
-        output.append(wrap(text, width=textwidth, subsequent_indent=indent))
+        output.append(
+            _dec(
+                wrap(text, width=textwidth, subsequent_indent=indent),
+                Colors.default_color(),
+            )
+        )
         num_verses += 1
 
     return (num_verses, output)
