@@ -33,9 +33,27 @@ def parse_passages(root: etree._Element):
         i += 1
         indent = " " * (1 + len(str(i)))
 
+        """ Needed for red-letter decoration. """
+        # red = div.xpath("./span[contains(@class, 'red-letter')]")
+
         # Text sanitization for display
         body = [t.strip() for t in div.itertext()]
         body = [x for x in body if x]
+
+        """ Red-letter attempt; good progress, need to persist between
+            textwrapped lines.
+        logging.info(body)
+        for i in range(len(body)):
+            for section in red:
+                logging.info(section.text)
+                # TODO: This doesn't work... because the red letter is
+                # split upon multiple lines via textwrap.wrap
+                # Think of a clever way to persist red-letter styles through
+                # our output list along with textwrap.wrap results
+                body[i] = body[i].replace(section.text, f"<{section.text}>")
+        logging.info(f" * {body}")
+        """
+
         body = [verse_num] + body[offset:]
 
         text = re.sub(r"\s{2}", " ", " ".join(body))

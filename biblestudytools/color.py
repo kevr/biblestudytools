@@ -9,6 +9,8 @@ COLOR_IDS = {
     "default": 2,
 }
 
+started = False
+
 
 class Colors:
     pair_ids: dict[str, int]
@@ -16,7 +18,8 @@ class Colors:
 
     def __init__(self, pairs: list[tuple[str, tuple[int, int]]] = []):
         self.pair_ids, self.pairs = {}, {}
-
+        global started
+        started = True
         curses.start_color()
         curses.use_default_colors()
 
@@ -31,7 +34,9 @@ class Colors:
         return COLORS.get(name)
 
     def decoration(name: str, attr: int = 0) -> int:
-        return curses.color_pair(COLOR_IDS.get(name)) | attr
+        return (
+            (curses.color_pair(COLOR_IDS.get(name)) | attr) if started else 0
+        )
 
     def default_color(attr: int = 0) -> int:
         return Colors.decoration("default", attr)

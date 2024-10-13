@@ -183,7 +183,7 @@ def main():
 
             for title, passage in results:
                 print(f" - {title}")
-                for lines in passage:
+                for attr, lines in passage:
                     print("\n".join(lines))
                 print()
 
