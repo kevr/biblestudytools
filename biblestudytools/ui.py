@@ -57,7 +57,7 @@ class BookUI:
         lhs = f"{title}, {num_chapter}"
         if chapters is not None:
             lhs += f" of {chapters}"
-        title = f"{lhs} | {verses[0]}-{verses[1]}"
+        title = f"{lhs} — vv. {verses[0]}-{verses[1]}"
 
         y, x = self.titlebar.getmaxyx()
         if x < len(title) + 1:
