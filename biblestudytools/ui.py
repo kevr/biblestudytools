@@ -54,7 +54,6 @@ class BookUI:
 
         self.c = Colors()
         self.c.define("highlight", (curses.COLOR_BLACK, curses.COLOR_BLUE))
-        self.c.define("splash", (curses.COLOR_BLACK, curses.COLOR_BLUE))
 
         # Initialize input specifics
         self.stdscr.keypad(True)
@@ -64,7 +63,7 @@ class BookUI:
 
         self._init_layout(*self.stdscr.getmaxyx())
 
-    def _init_layout(self, h: int, w: int, splash: bool = True):
+    def _init_layout(self, h: int, w: int):
         self.h, self.w = h, w
         o = self.TITLEBAR_HEIGHT
 
@@ -73,19 +72,6 @@ class BookUI:
             " ", curses.color_pair(self.c.id("highlight")) | curses.A_BOLD
         )
         self.titlebar.refresh()
-
-        """
-        if splash:
-            splash_str = "Loading..."
-            dh = int((h / 2) - 1)
-            dw = int((w / 2) - (len(splash_str) / 2))
-            self.splash = self.stdscr.derwin(3, len(splash_str) + 6, dh, dw)
-            self.splash.bkgd(
-                " ", curses.color_pair(self.c.id("splash")) | curses.A_BOLD
-            )
-            self.splash.addstr(1, 3, splash_str)
-            self.splash.refresh()
-        """
 
         self.pad = None
 
@@ -113,7 +99,6 @@ class BookUI:
         self.titlebar.refresh()
 
     def _init_pad(self):
-        # self.splash.deleteln()
         h, w = self.stdscr.getmaxyx()
         o = 1
         self.pad = self.stdscr.subpad(
