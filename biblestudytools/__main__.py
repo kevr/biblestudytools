@@ -128,7 +128,8 @@ def output_chapter(chapter: Chapter, verses: tuple[int, int]):
 
     print(f"\n <---> {chapter.title}:{verse_disp} <--->\n")
     for i in range(start - 1, end):
-        for line in chapter.verses[i]:
+        attr, lines = chapter.verses[i]
+        for line in lines:
             print(line)
         # print(chapter.verses[i])
     print()
