@@ -126,12 +126,11 @@ def output_chapter(chapter: Chapter, verses: tuple[int, int]):
     if start == end:
         verse_disp = str(start)
 
-    print(f"\n <---> {chapter.title}:{verse_disp} <--->\n")
+    print(f"\n \033[1;4m{chapter.title}:{verse_disp}\033[0m\n")
     for i in range(start - 1, end):
         attr, lines = chapter.verses[i]
         for line in lines:
             print(line)
-        # print(chapter.verses[i])
     print()
 
 
