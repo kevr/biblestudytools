@@ -44,6 +44,13 @@ def parse_args():
         help="Bible translation (default: 'nkjv')",
     )
     parser.add_argument(
+        "-r",
+        "--raw",
+        default=False,
+        action="store_true",
+        help="Produce raw output (without ANSI escape codes)",
+    )
+    parser.add_argument(
         "book",
         help="regex matched against books "
         "returned by 'biblestudytools list'",
@@ -53,6 +60,7 @@ def parse_args():
         args = parser.parse_args()
         return {
             "translation": args.translation,
+            "raw": args.raw,
             "book": args.book,
             "chapter": None,
             "verse": None,
@@ -62,6 +70,7 @@ def parse_args():
         args = parser.parse_args()
         return {
             "translation": args.translation,
+            "raw": args.raw,
             "book": args.book,
             "chapter": None,
             "verse": None,
@@ -102,6 +111,7 @@ def parse_args():
 
     return {
         "translation": args.translation,
+        "raw": args.raw,
         "book": args.book,
         "chapter": ch,
         "verse": verse,
@@ -120,13 +130,20 @@ def parse_range(verses: str) -> tuple[int, int]:
     )
 
 
-def output_chapter(chapter: Chapter, verses: tuple[int, int]):
+def output_chapter(
+    chapter: Chapter, verses: tuple[int, int], raw: bool = False
+):
     start, end = verses
     verse_disp = f"{start}-{end}"
     if start == end:
         verse_disp = str(start)
 
-    print(f"\n \033[1;4m{chapter.title}:{verse_disp}\033[0m\n")
+    pre, post = "", ""
+    if not raw:
+        pre = "\033[1;4m"
+        post = "\033[0m"
+
+    print(f"\n {pre}{chapter.title}:{verse_disp}{post}\n")
     for i in range(start - 1, end):
         attr, lines = chapter.verses[i]
         for line in lines:
@@ -134,14 +151,16 @@ def output_chapter(chapter: Chapter, verses: tuple[int, int]):
     print()
 
 
-def single_view(bible: Bible, book: str, ch: int, verses: tuple[int, int]):
+def single_view(
+    bible: Bible, book: str, ch: int, verses: tuple[int, int], raw: bool
+):
     content = bible.get_chapter(book, ch)
     chapter = Chapter(content)
 
     if not verses:
         verses = chapter.range()
 
-    output_chapter(chapter, verses)
+    output_chapter(chapter, verses, raw)
 
 
 def get_lines(chapter: Chapter):
@@ -152,7 +171,9 @@ def get_lines(chapter: Chapter):
     return lines
 
 
-def book_view(bible: Bible, book: str, ch: int, verses: tuple[int, int]):
+def book_view(
+    bible: Bible, book: str, ch: int, verses: tuple[int, int], raw: bool
+):
     ui = BookUI()
     ui.loop(bible, book, ch)
 
@@ -218,7 +239,7 @@ def main():
     }
 
     try:
-        f.get(is_oneshot)(bible, book, ch, verses)
+        f.get(is_oneshot)(bible, book, ch, verses, args.get("raw"))
     except Exception as exc:
         logging.error(exc)
         logging.error(traceback.format_exc())
