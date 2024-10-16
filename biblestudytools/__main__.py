@@ -252,6 +252,7 @@ if __name__ == "__main__":
     try:
         e = main()
     except Exception as exc:
-        print(exc)
-        e = 1
-    sys.exit(1)
+        print(f"error: {exc}")
+    except HttpError as exc:
+        print(f"error: {exc}")
+    sys.exit(e)
