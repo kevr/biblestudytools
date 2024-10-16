@@ -185,7 +185,12 @@ def main():
         print(exc)
         return 1
 
-    bible = Bible(args.get("translation"))
+    try:
+        bible = Bible(args.get("translation"))
+    except HttpError as exc:
+        print(f"error: {exc}")
+        return 1
+
     book = args.get("book")
     books = bible.books()
     if book == "list":
