@@ -66,7 +66,7 @@ def parse_args():
             "verse": None,
         }
     elif "search" in sys.argv:
-        parser.add_argument("query")
+        parser.add_argument("query", nargs="+")
         args = parser.parse_args()
         return {
             "translation": args.translation,

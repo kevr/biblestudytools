@@ -1,3 +1,4 @@
+import logging
 import os
 import re
 from urllib.parse import quote_plus
@@ -21,8 +22,10 @@ class Bible:
         self.num_results = 99
         self.num_chapters = None
 
-    def search(self, criteria: str, p: int = 1):
-        q = quote_plus(criteria)
+    def search(self, criteria: list[str], p: int = 1):
+        logging.debug(f"Search keywords: {criteria}")
+        q = quote_plus(" ".join([f'"{c}"' for c in criteria]))
+        logging.debug(f"Search query: '{q}'")
         uri = f"{BASE_URI}/search"
         params = [
             ("t", self.translation),
