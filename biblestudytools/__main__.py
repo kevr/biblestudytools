@@ -148,7 +148,6 @@ def output_chapter(
     m = start - 1
     for i in range(start - 1, end):
         while not chapter.verses[m][1][0].startswith(f"{i + 1} "):
-            logging.debug(f"Bypassing '{chapter.verses[m][1]}'")
             m += 1
         attr, lines = chapter.verses[m]
         for line in lines:
