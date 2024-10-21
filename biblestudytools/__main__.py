@@ -143,7 +143,8 @@ def output_chapter(
         pre = "\033[1;4m"
         post = "\033[0m"
 
-    print(f"\n {pre}{chapter.title}:{verse_disp}{post}\n")
+    t = chapter.translation.upper()
+    print(f"\n {pre}{chapter.title}:{verse_disp} ({t}){post}\n")
 
     m = start - 1
     for i in range(start - 1, end):
@@ -159,7 +160,7 @@ def single_view(
     bible: Bible, book: str, ch: int, verses: tuple[int, int], raw: bool
 ):
     content = bible.get_chapter(book, ch)
-    chapter = Chapter(content)
+    chapter = Chapter(bible.translation.name, content)
 
     if not verses:
         verses = chapter.range()

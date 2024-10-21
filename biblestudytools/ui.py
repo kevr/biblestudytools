@@ -57,10 +57,11 @@ class BookUI:
         lhs = f"{title}, {num_chapter}"
         if chapters is not None:
             lhs += f" of {chapters}"
-        title = f"{lhs} — vv. {verses[0]}-{verses[1]}"
+        t = self.bible.translation.name.upper()
+        title = f"{lhs} — vv. {verses[0]}-{verses[1]} ({t})"
 
         y, x = self.titlebar.getmaxyx()
-        if x < len(title) + 1:
+        if x < len(title) + 2:
             return None
 
         self.titlebar.erase()
@@ -167,7 +168,7 @@ class BookUI:
 
             try:
                 content = self.bible.get_chapter(book, self.ch)
-                self.chapter = Chapter(content)
+                self.chapter = Chapter(self.bible.translation.name, content)
             except HttpError as e:
                 logging.error(e)
                 curses.endwin()

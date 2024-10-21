@@ -4,7 +4,8 @@ from .algorithm import parse_passages
 
 
 class Chapter:
-    def __init__(self, content: str) -> "Chapter":
+    def __init__(self, translation: str, content: str) -> "Chapter":
+        self.translation = translation
         self.content = content
         self.parse(self.content)
 
