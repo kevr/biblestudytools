@@ -144,8 +144,13 @@ def output_chapter(
         post = "\033[0m"
 
     print(f"\n {pre}{chapter.title}:{verse_disp}{post}\n")
+
+    m = start - 1
     for i in range(start - 1, end):
-        attr, lines = chapter.verses[i]
+        while not chapter.verses[m][1][0].startswith(f"{i + 1} "):
+            logging.debug(f"Bypassing '{chapter.verses[m][1]}'")
+            m += 1
+        attr, lines = chapter.verses[m]
         for line in lines:
             print(line)
     print()
