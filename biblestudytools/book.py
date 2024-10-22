@@ -22,6 +22,7 @@ class Chapter:
         self.num_verses, self.verses = parse_passages(root)
 
     def range(self) -> tuple[int, int]:
+        # TODO: Fix extra +1 verses in NIV acts 8, why?
         return (1, self.num_verses)
 
     def lines(self):

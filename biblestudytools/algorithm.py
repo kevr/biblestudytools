@@ -54,6 +54,7 @@ def parse_passages(root: etree._Element):
         logging.info(f" * {body}")
         """
 
+        body[offset] = body[offset].replace(str(verse_num), "")
         body = [verse_num] + body[offset:]
 
         text = re.sub(r"\s{2}", " ", " ".join(body))
