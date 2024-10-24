@@ -24,17 +24,16 @@ class Bible:
 
     def search(self, criteria: list[str], p: int = 1):
         logging.debug(f"Search keywords: {criteria}")
-        q = quote_plus(" ".join([f'"{c}"' for c in criteria]))
+        q = " ".join([f'"{c}"' for c in criteria])
         logging.debug(f"Search query: '{q}'")
         uri = f"{BASE_URI}/search"
-        params = [
-            ("t", self.translation),
-            ("q", q),
-            ("s", "bibles"),
-            ("p", str(p)),
-        ]
-        urlparams = "&".join([f"{k}={v}" for k, v in params])
-        content = http.get(f"{uri}?{urlparams}")
+        params = {
+            "t": self.translation,
+            "q": q,
+            "s": "bibles",
+            "p": str(p),
+        }
+        content = http.get(uri, params=params)
         root = http.parse(content.decode())
 
         parent = '//div[@id="tabContent"]/div'

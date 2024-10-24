@@ -12,8 +12,8 @@ def parse(content: str) -> etree._Element:
     return etree.fromstring(content, parser)
 
 
-def get(uri):
-    response = requests.get(uri)
+def get(uri, **kwargs):
+    response = requests.get(uri, **kwargs)
     status = response.status_code
     if status != 200:
         raise HttpError(f"returned status {status}")
