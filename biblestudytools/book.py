@@ -4,12 +4,14 @@ from .algorithm import parse_passages
 
 
 class Chapter:
-    def __init__(self, translation: str, content: str) -> "Chapter":
+    def __init__(
+        self, translation: str, content: str, raw: bool = False
+    ) -> "Chapter":
         self.translation = translation
         self.content = content
-        self.parse(self.content)
+        self.parse(self.content, raw)
 
-    def parse(self, content: str):
+    def parse(self, content: str, raw: bool = False):
         parser = etree.HTMLParser(recover=True)
         root = etree.fromstring(content, parser)
 
@@ -19,7 +21,7 @@ class Chapter:
             raise Exception("Page not found")
 
         self.title = title
-        self.num_verses, self.verses = parse_passages(root)
+        self.num_verses, self.verses = parse_passages(root, raw)
 
     def range(self) -> tuple[int, int]:
         # TODO: Fix extra +1 verses in NIV acts 8, why?

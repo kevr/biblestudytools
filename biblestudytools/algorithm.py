@@ -13,7 +13,20 @@ def _dec(content: list[str], attr: int = 0) -> tuple[int, list[str]]:
     return (attr, content)
 
 
-def parse_passages(root: etree._Element):
+def wrap_(text, **kw):
+    return wrap(text, **kw)
+
+
+def raw_wrap_(text, **kw):
+    return [text]
+
+
+def parse_passages(root: etree._Element, raw: bool = False):
+
+    wrap_fn = wrap_
+    if raw:
+        wrap_fn = raw_wrap_
+
     ts = shutil.get_terminal_size((80, 20))
     textwidth = int(ts.columns * 0.9)
     divs = root.xpath(".//div[contains(@class, 'leading-8')]")
@@ -61,7 +74,7 @@ def parse_passages(root: etree._Element):
         text = re.sub(r" ([:?,])", r"\1", text)
 
         if title:
-            w = wrap(title, width=textwidth, subsequent_indent="")
+            w = wrap_fn(title, width=textwidth, subsequent_indent="")
             output += [
                 _dec([""], Colors.default_color()),
                 # Boldify segment titles
@@ -71,7 +84,7 @@ def parse_passages(root: etree._Element):
 
         output.append(
             _dec(
-                wrap(text, width=textwidth, subsequent_indent=indent),
+                wrap_fn(text, width=textwidth, subsequent_indent=indent),
                 Colors.default_color(),
             )
         )

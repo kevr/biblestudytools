@@ -160,7 +160,7 @@ def single_view(
     bible: Bible, book: str, ch: int, verses: tuple[int, int], raw: bool
 ):
     content = bible.get_chapter(book, ch)
-    chapter = Chapter(bible.translation.name, content)
+    chapter = Chapter(bible.translation.name, content, raw)
 
     if not verses:
         verses = chapter.range()
