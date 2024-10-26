@@ -12,6 +12,7 @@ import argparse
 import logging
 import logging.config
 import os
+import shutil
 import sys
 import traceback
 
@@ -23,6 +24,30 @@ from .http import HttpError
 from .ui import BookUI
 
 HOME = os.environ.get("HOME")
+SEARCH_BOOKS = {
+    # Books
+    "matthew": "mt",
+    "mark": "mr",
+    "luke": "lu",
+    "john": "joh",
+    "acts": "ac",
+    "romans": "ro",
+    "1 corinthians": "1co",
+    "2 corinthians": "2co",
+    "galatians": "ga",
+    "ephesians": "eph",
+    "1 peter": "1pe",
+    "2 peter": "2pe",
+    "1 john": "1jo",
+    "2 john": "2jo",
+    "3 john": "3jo",
+    # Specific ranges
+    "old": "o",
+    "ot": "o",
+    "new": "n",
+    "nt": "n",
+    "gospels": "gos",
+}
 
 logging.basicConfig(
     filename="/tmp/bst.log",
@@ -31,7 +56,7 @@ logging.basicConfig(
 )
 
 
-def parse_args():
+def make_optional_parser() -> argparse.ArgumentParser:
     epilog = "To list available books, run 'biblestudytools list'"
     parser = argparse.ArgumentParser(
         prog=PROG, description=f"Cache client for {BASE_URI}", epilog=epilog
@@ -55,25 +80,51 @@ def parse_args():
         help="regex matched against books "
         "returned by 'biblestudytools list'",
     )
+    return parser
+
+
+def parse_args():
+    parser = make_optional_parser()
 
     if "list" in sys.argv or "download" in sys.argv:
         args = parser.parse_args()
         return {
             "translation": args.translation,
             "raw": args.raw,
+            "b": b,
             "book": args.book,
-            "chapter": None,
-            "verse": None,
         }
     elif "search" in sys.argv:
-        parser.add_argument("query", nargs="+")
+        parser.add_argument(
+            "-b",
+            "--book",
+            dest="b",
+            type=str.lower,
+            help="Particular book(s) to search",
+        )
+        parser.add_argument(
+            "query", nargs="+", help="Keyword strings (space-separated)"
+        )
         args = parser.parse_args()
+
+        b = None
+        if args.b:
+            for key in SEARCH_BOOKS.keys():
+                if key.startswith(args.b):
+                    b = SEARCH_BOOKS.get(key)
+                    print(f"Focusing search on '{key}'...\n")
+                    break
+
+            if b is None:
+                raise LookupError(
+                    f"error: no book '{args.b}' available to search"
+                )
+
         return {
             "translation": args.translation,
             "raw": args.raw,
             "book": args.book,
-            "chapter": None,
-            "verse": None,
+            "b": b,
             "query": args.query,
         }
 
@@ -183,6 +234,38 @@ def book_view(
     ui.loop(bible, book, ch)
 
 
+def search(args: dict[str, str], bible: Bible):
+    page = 1
+    while True:
+        try:
+            results = bible.search(args, page)
+        except HttpError as exc:
+            return 0
+        page += 1
+
+        ts = shutil.get_terminal_size((80, 20))
+        textwidth = int(ts.columns * 0.9)
+        print("#" * textwidth)
+        for title, passage in results:
+            print(f" - {title}")
+            for attr, lines in passage:
+                print("\n".join(lines))
+            print()
+
+        remaining = bible.num_results - (page * 20)
+        if remaining < 1:
+            break
+
+        try:
+            print(f"Remaining results: {remaining}")
+            input("Press enter for more or CTRL+C to quit...")
+            print()
+        except KeyboardInterrupt:
+            break
+
+    return 0
+
+
 def main():
     try:
         args = parse_args()
@@ -202,33 +285,7 @@ def main():
         print(", ".join([t[0] for t in books]))
         return 0
     elif book == "search":
-        p = 1
-        while True:
-            try:
-                results = bible.search(args.get("query"), p)
-            except HttpError:
-                break
-
-            remaining = bible.num_results - (p * 20)
-            p += 1
-
-            for title, passage in results:
-                print(f" - {title}")
-                for attr, lines in passage:
-                    print("\n".join(lines))
-                print()
-
-            if remaining < 1:
-                break
-
-            try:
-                print(f"Remaining results: {remaining}")
-                input("Press enter for more or CTRL+C to quit...")
-                print()
-            except KeyboardInterrupt:
-                break
-
-        return 0
+        return search(args, bible)
     elif book == "download":
         bible.download()
         return 0

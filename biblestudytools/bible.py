@@ -1,6 +1,7 @@
 import logging
 import os
 import re
+from typing import Any
 from urllib.parse import quote_plus
 
 from . import http
@@ -22,17 +23,24 @@ class Bible:
         self.num_results = 99
         self.num_chapters = None
 
-    def search(self, criteria: list[str], p: int = 1):
+    def search(self, args: dict[str, Any], page: int = 1):
+        criteria = args.get("query")
         logging.debug(f"Search keywords: {criteria}")
         q = " ".join([f'"{c}"' for c in criteria])
-        logging.debug(f"Search query: '{q}'")
         uri = f"{BASE_URI}/search"
         params = {
             "t": self.translation,
             "q": q,
             "s": "bibles",
-            "p": str(p),
+            "p": str(page),
         }
+
+        if "b" in args:
+            params["c"] = args.get("b")
+
+        logging.debug(f"Search URL: '{q}'")
+        logging.debug(f"Search params: {params}")
+
         content = http.get(uri, params=params)
         root = http.parse(content.decode())
 
@@ -51,6 +59,7 @@ class Bible:
             title = "".join([t.strip() for t in title[0].itertext()])
             num_verses, passage = parse_passages(result)
             output.append((title, passage))
+
         return output
 
     def chapter_uri(self, book: str, chapter: int) -> str:
