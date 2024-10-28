@@ -21,6 +21,7 @@ from .bible import Bible
 from .book import Chapter
 from .conf import BASE_URI, PROG
 from .http import HttpError
+from .system import execute
 from .ui import BookUI
 
 HOME = os.environ.get("HOME")
@@ -76,6 +77,13 @@ def make_optional_parser() -> argparse.ArgumentParser:
         help="Produce raw output (without ANSI escape codes)",
     )
     parser.add_argument(
+        "-c",
+        "--clipboard",
+        default=False,
+        action="store_true",
+        help="Copy output to clipboard",
+    )
+    parser.add_argument(
         "book",
         help="regex matched against books "
         "returned by 'biblestudytools list'",
@@ -91,6 +99,7 @@ def parse_args():
         return {
             "translation": args.translation,
             "raw": args.raw,
+            "clipboard": args.clipboard,
             "b": b,
             "book": args.book,
         }
@@ -122,9 +131,10 @@ def parse_args():
 
         return {
             "translation": args.translation,
-            "raw": args.raw,
-            "book": args.book,
+            "raw": args.raw or args.clipboard,
+            "clipboard": args.clipboard,
             "b": b,
+            "book": args.book,
             "query": args.query,
         }
 
@@ -162,7 +172,8 @@ def parse_args():
 
     return {
         "translation": args.translation,
-        "raw": args.raw,
+        "raw": args.raw or args.clipboard,
+        "clipboard": args.clipboard,
         "book": args.book,
         "chapter": ch,
         "verse": verse,
@@ -181,8 +192,16 @@ def parse_range(verses: str) -> tuple[int, int]:
     )
 
 
+def print_append(memo: list[str], text: str):
+    print(text)
+    memo.append(text)
+
+
 def output_chapter(
-    chapter: Chapter, verses: tuple[int, int], raw: bool = False
+    chapter: Chapter,
+    verses: tuple[int, int],
+    raw: bool = False,
+    clipboard: bool = False,
 ):
     start, end = verses
     verse_disp = f"{start}-{end}"
@@ -191,11 +210,12 @@ def output_chapter(
 
     pre, post = "", ""
     if not raw:
-        pre = "\033[1;4m"
+        pre = "\n \033[1;4m"
         post = "\033[0m"
 
     t = chapter.translation.upper()
-    print(f"\n {pre}{chapter.title}:{verse_disp} ({t}){post}\n")
+    memo = list()
+    print_append(memo, f"{pre}{chapter.title}:{verse_disp} ({t}){post}\n")
 
     m = start - 1
     for i in range(start - 1, end):
@@ -203,12 +223,23 @@ def output_chapter(
             m += 1
         attr, lines = chapter.verses[m]
         for line in lines:
-            print(line)
-    print()
+            print_append(memo, line)
+
+    if clipboard:
+        memo_str = "\n".join(memo)
+        execute("wl-copy", input_data=memo_str)
+        execute("wl-copy", "-p", input_data=memo_str)
+    else:
+        print()
 
 
 def single_view(
-    bible: Bible, book: str, ch: int, verses: tuple[int, int], raw: bool
+    bible: Bible,
+    book: str,
+    ch: int,
+    verses: tuple[int, int],
+    raw: bool,
+    clipboard: bool,
 ):
     content = bible.get_chapter(book, ch)
     chapter = Chapter(bible.translation.name, content, raw)
@@ -216,7 +247,7 @@ def single_view(
     if not verses:
         verses = chapter.range()
 
-    output_chapter(chapter, verses, raw)
+    output_chapter(chapter, verses, raw, clipboard)
 
 
 def get_lines(chapter: Chapter):
@@ -228,7 +259,12 @@ def get_lines(chapter: Chapter):
 
 
 def book_view(
-    bible: Bible, book: str, ch: int, verses: tuple[int, int], raw: bool
+    bible: Bible,
+    book: str,
+    ch: int,
+    verses: tuple[int, int],
+    raw: bool,
+    clipboard: bool,
 ):
     ui = BookUI()
     ui.loop(bible, book, ch)
@@ -306,7 +342,9 @@ def main():
     }
 
     try:
-        f.get(is_oneshot)(bible, book, ch, verses, args.get("raw"))
+        f.get(is_oneshot)(
+            bible, book, ch, verses, args.get("raw"), args.get("clipboard")
+        )
     except Exception as exc:
         logging.error(exc)
         logging.error(traceback.format_exc())
