@@ -76,13 +76,16 @@ def make_optional_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Produce raw output (without ANSI escape codes)",
     )
-    parser.add_argument(
-        "-c",
-        "--clipboard",
-        default=False,
-        action="store_true",
-        help="Copy output to clipboard",
-    )
+
+    if os.environ.get("WAYLAND_DISPLAY", None):
+        parser.add_argument(
+            "-c",
+            "--clipboard",
+            default=False,
+            action="store_true",
+            help="Copy output to clipboard",
+        )
+
     parser.add_argument(
         "book",
         help="regex matched against books "
