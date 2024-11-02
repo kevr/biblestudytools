@@ -26,6 +26,11 @@ from .ui import BookUI
 
 HOME = os.environ.get("HOME")
 SEARCH_BOOKS = {
+    "genesis": "ge",
+    "exodus": "ex",
+    "leviticus": "le",
+    "numbers": "nu",
+    "deuteronomy": "de",
     # Books
     "matthew": "mt",
     "mark": "mr",
@@ -42,6 +47,7 @@ SEARCH_BOOKS = {
     "1 john": "1jo",
     "2 john": "2jo",
     "3 john": "3jo",
+    "revelation": "re",
     # Specific ranges
     "old": "o",
     "ot": "o",
