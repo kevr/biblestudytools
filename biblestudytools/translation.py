@@ -1,4 +1,5 @@
 import gzip
+import logging
 import os
 
 from lxml import etree
@@ -38,7 +39,7 @@ class Translation:
             with gzip.open(local_uri, "rb") as f:
                 content = f.read()
         else:
-            dp = "/".join(local_uri.split("/")[-1:])
+            dp = "/".join(local_uri.split("/")[:-1])
             if not os.path.isdir(dp):
                 os.mkdir(dp)
 
