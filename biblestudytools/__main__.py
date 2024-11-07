@@ -103,6 +103,7 @@ def make_optional_parser() -> argparse.ArgumentParser:
 def parse_args():
     parser = make_optional_parser()
 
+    b = None
     if "list" in sys.argv or "download" in sys.argv:
         args = parser.parse_args()
         return {
@@ -125,7 +126,6 @@ def parse_args():
         )
         args = parser.parse_args()
 
-        b = None
         if args.b:
             for key in SEARCH_BOOKS.keys():
                 if key.startswith(args.b):
