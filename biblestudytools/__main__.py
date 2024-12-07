@@ -280,33 +280,21 @@ def book_view(
 
 
 def search(args: dict[str, str], bible: Bible):
-    page = 1
-    while True:
-        try:
-            results = bible.search(args, page)
-        except HttpError as exc:
-            return 0
-        page += 1
+    results = bible.search(args, 1)
 
-        ts = shutil.get_terminal_size((80, 20))
-        textwidth = int(ts.columns * 0.9)
-        print("#" * textwidth)
-        for title, passage in results:
-            print(f" - {title}")
-            for attr, lines in passage:
-                print("\n".join(lines))
-            print()
+    for title, passage in results:
+        print(f" - {title}")
+        for attr, lines in passage:
+            print("\n".join(lines))
+        print()
 
-        remaining = bible.num_results - (page * 20)
-        if remaining < 1:
-            break
+    remaining = bible.num_results
+    if remaining < 1:
+        print("No results found")
+        return 1
 
-        try:
-            print(f"Remaining results: {remaining}")
-            input("Press enter for more or CTRL+C to quit...")
-            print()
-        except KeyboardInterrupt:
-            break
+    print(f"Total results: {remaining}")
+    print()
 
     return 0
 

@@ -1,6 +1,7 @@
 import logging
 import os
 import re
+import sys
 from typing import Any
 from urllib.parse import quote_plus
 
@@ -24,6 +25,24 @@ class Bible:
         self.num_chapters = None
 
     def search(self, args: dict[str, Any], page: int = 1):
+        print("Searching page ", end=str())
+        p = page
+        results = []
+        self.num_results = 0
+        while True:
+            print(f"{p}.. ", end=str())
+            sys.stdout.flush()
+            try:
+                results += self._search(args, p)
+            except Exception:
+                p += 1
+                break
+            p += 1
+        print()
+        self.num_results = len(results)
+        return results
+
+    def _search(self, args: dict[str, Any], page: int = 1):
         criteria = args.get("query")
         logging.debug(f"Search keywords: {criteria}")
         q = " ".join([f'"{c}"' for c in criteria])
@@ -46,13 +65,10 @@ class Bible:
 
         parent = '//div[@id="tabContent"]/div'
 
-        num_results = root.xpath(
-            parent + '/div[contains(@class, "text-gray-800")]/' "text()"
-        )[0].strip()
-        m = re.match(r"^Found (\d+) Results for$", num_results)
-        self.num_results = int(m.group(1))
-
         results = root.xpath(parent + '/div[contains(@class, "shadow-md")]')
+        if not results:
+            raise Exception("finished")
+
         output = []
         for result in results:
             title = result.xpath("./a")
